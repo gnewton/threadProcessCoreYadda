@@ -1,0 +1,2777 @@
+\documentclass[10pt]{article} % say
+\usepackage{beamerarticle}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{etoolbox}
+\usepackage{placeins}
+\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri,shadows}
+\usepackage[margin=1.5cm,landscape]{geometry}
+
+%%%%%%%%%%%%
+\hypersetup{
+  pdfborder=0 0 0,
+  frenchlinks=true,
+  linkbordercolor=1 1 1,
+} 
+
+%%%%%%%%
+
+\providebool{links}
+\providebool{ids}
+\boolfalse{links}
+\booltrue{ids}
+
+
+
+\pagestyle{empty}
+%\pagestyle{myheadings}
+%\markboth{\copy 2011 Glen Newton}{\copy 2011 Glen Newton}
+%\pagestyle{fancy}
+%\cfoot{\copyright \ 2011 Glen Newton}
+\begin{document}
+%\pagestyle{none} 
+
+%\def\methodArrow{to}
+\def\methodArrow{latex}
+%\def\threadArrow{stealth}
+\def\threadArrow{latex}
+\def\processArrow{latex}
+
+
+\def\taskColor{black}
+
+\def\machineColor{gray}
+\def\machineCorner{0mm}
+\def\chipColor{blue}
+\def\chipCorner{1mm}
+\def\coreColor{yellow}
+\def\coreCorner{1mm}
+\def\processColor{purple}
+\def\processCorner{2mm}
+\def\threadColor{green}
+\def\threadCorner{3mm}
+
+\def\fillOpacity{40}
+\def\drawOpacity{90}
+
+
+
+% Style borrowed from http://www.texample.net/tikz/examples/kalman-filter/
+% Kalman filter system model 
+% by Burkart Lingner
+\tikzstyle{sdata}=[circle,
+thick,
+minimum size=1.2cm,
+draw=gray!85!black,
+fill=gray!40,
+decorate,
+drop shadow
+%decoration={random steps,
+%  segment length=2pt,
+%  amplitude=2pt}
+]%
+
+
+\tikzstyle{sLegend}=[rectangle,
+drop shadow,
+inner sep=0.4cm,
+draw=gray!80,
+fill=gray!10,
+rounded corners=6mm,
+thick,
+]
+
+\tikzstyle{sInnerLegend}=[rectangle,
+        inner sep=.6cm,
+        draw=gray!80,
+        fill=gray!20,
+]
+
+
+
+
+
+\newcommand{\qback}[6]{% 1=cornerType 2=color 3=separation 4=nodes
+                       % 5=label 6=id
+  \begin{pgfonlayer}{background}
+    \node[rectangle,
+    rounded corners=#1,
+  %  drop shadow,
+%    fill opacity=0,
+    fill=#2!\fillOpacity,
+%    draw opacity=0,
+    draw=#2!\drawOpacity,
+    inner sep=#3,
+    fit=#4] (#5) {#6};
+  \end{pgfonlayer}}
+
+
+
+\newcommand{\machineBack}[3]{% 1=sep 2=fit 3=label
+  \qback{\machineCorner}{\machineColor}{#1}{#2}{#3}{};
+}
+
+\newcommand{\processBack}[3]{% 1=sep 2=fit 3=label
+  \qback{\processCorner}{\processColor}{#1}{#2}{#3}{};
+}
+
+\newcommand{\threadBack}[3]{% 1=sep 2=fit 3=label
+  \qback{\threadCorner}{\threadColor}{#1}{#2}{#3}{};
+}
+
+\newcommand{\coreBack}[3]{% 1=sep 2=fit 3=label
+  \qback{\coreCorner}{\coreColor}{#1}{#2}{#3}{};
+}
+
+\newcommand{\chipBack}[3]{% 1=sep 2=fit 3=label
+  \qback{\chipCorner}{\chipColor}{#1}{#2}{#3}{};
+}
+
+
+\tikzstyle{sxmachine}=[rectangle,
+fill=\machineColor!\fillOpacity,
+draw=\machineColor!\drawOpacity,
+inner sep=0.4cm,
+minimum height=2.55cm,
+drop shadow,
+]
+
+\tikzstyle{legendMachine}=[rectangle,
+fill=\machineColor!\fillOpacity,
+draw=\machineColor!\drawOpacity,
+inner sep=0.4cm,
+minimum height=1.55cm,
+drop shadow,
+]
+
+\tikzstyle{sxprocess}=[rectangle,
+fill=\processColor!\fillOpacity,
+draw=\processColor!\drawOpacity,
+inner sep=0.4cm,
+drop shadow,
+rounded corners=\processCorner]
+
+\tikzstyle{sxthread}=[rectangle,
+fill=\threadColor!\fillOpacity,
+draw=\threadColor!\drawOpacity,
+inner sep=0.4cm,
+drop shadow,
+rounded corners=\threadCorner]
+
+
+\tikzstyle{sxcore}=[rectangle,
+fill=\coreColor!\fillOpacity,
+draw=\coreColor!\drawOpacity,
+inner sep=0.4cm,
+drop shadow,
+rounded corners=\coreCorner]
+
+\tikzstyle{sxchip}=[rectangle,
+fill=\chipColor!\fillOpacity,
+draw=\chipColor!\drawOpacity,
+inner sep=0.4cm,
+drop shadow,
+rounded corners=\chipCorner]
+
+\tikzstyle{sTask}=[rectangle,
+draw=\taskColor!\drawOpacity
+,
+fill=\taskColor!\fillOpacity,
+inner sep=6pt,
+minimum size=4mm,
+text centered, 
+%drop shadow,
+text width=1.3cm]
+
+\newcommand{\setAllX}[1]{%
+  \def\xshiftA{#1}
+  \def\xshiftB{#1}
+  \def\xshiftC{#1}
+  \def\xshiftD{#1}
+  \def\xshiftE{#1}
+}
+  
+  % \def\xshiftA{5mm}
+  % \def\xshiftB{5mm}
+  % \def\xshiftC{5mm}
+  % \def\xshiftD{5mm}
+  % \def\xshiftE{5mm}
+\def\pipeSep{-15mm}
+\def\xshiftC{20mm}
+\def\xshiftA{2mm}
+\def\xshiftE{2mm}
+
+
+\def\lthistOuter{13.6mm}
+\def\lfarOuter{11mm}
+\def\lmidOuter{0.85cm}
+\def\louter{0.65cm}
+\def\lmiddle{0.4cm}
+\def\linner{0.22cm}
+%\setAllX{5mm}
+
+\newcommand{\nodes}[4]{%
+%\node[sdata] (#1) [#7] {\bf \inputx};
+ \node[sTask] (#1) {\bf Task A};
+ \node[sTask] (#2) [right=of #1, xshift=\xshiftB ] {\bf Task B};
+ \node[sTask] (#3) [right=of #2, xshift=\xshiftC ] {\bf Task C};
+ \node[sTask] (#4) [right=of #3, xshift=\xshiftD ] {\bf Task D};
+%\node[sdata] (#6) [right=of #5, xshift=\xshiftE] {\bf \resultsx};
+}
+
+\newcommand{\nodesX}[5]{%
+ \node[sTask] (#1) [#5]{\bf Task A};
+ \node[sTask] (#2) [right=of #1, xshift=\xshiftB ] {\bf Task B};
+ \node[sTask] (#3) [right=of #2, xshift=\xshiftC ] {\bf Task C};
+ \node[sTask] (#4) [right=of #3, xshift=\xshiftD ] {\bf Task D};
+}
+
+\newcommand{\edges}[6]{% 1=arr  2=arr 3=arr 4=arr 5=thick 6=node
+\pgfsetarrowsend{\processArrow}
+\draw (nA.east) -- (nB.west);
+\draw  (nB.east) -- (nC.west);
+\draw  (nC.east) -- (nD.west);
+}
+
+\newcommand{\edx}[4]{%
+   \draw (#1.east) -- (#2.west);
+   \draw (#2.east) -- (#3.west);
+   \draw (#3.east) -- (#4.west);
+}
+
+
+\newcommand{\legend}[1]{%
+  \node (nspacer1) [below=of #1] {\bf ------ LEGEND ------};
+%  \node[sxcore] (nxcore) [below=of nspacer1, yshift=5mm, xshift=-15mm] {\small \em Core};
+        %  \node[sxcore] (nxcore) [below=of nspacer1, yshift=2mm,
+        %  xshift=-15mm]
+  \node(cn) [below=of nspacer1, yshift=-3mm, inner sep=0pt,minimum size=0pt]{};
+  \node[sxcore] (nxcore) [left=of cn.east, xshift=5mm] {\small Core};
+  \node[sxprocess] (nxprocess) [right=of cn.west, xshift=-5mm] {\small Process};
+  \node[sxchip] (nxchip) [left=of nxcore] {\small Processor};
+  \node[sxthread] (nxthread) [right=of nxprocess] {\small Thread};
+  \node[legendMachine] (nxmachine) [left=of nxchip] {\small Machine};
+  \node[sTask] (nbbb) [right=of nxthread] {\small Task};
+
+  % \node (startX) [below=of ndata, xshift=8mm,yshift=-6mm] {\bf Data Flows:};
+  % %Method arrows
+  % \node (n0) [right=of startX, xshift=-5mm,yshift=-3mm] {};
+  % \node (nh1) [right=of n0] {};
+  %  \pgfsetarrowsend{\methodArrow}
+  % \draw (n0.north east) -- (nh1.north west);
+  % \node (n2) [right=of nh1,xshift=-13mm,yshift=2.7mm,align=left]
+  % {Intra--thread};
+  % %Thread arrows
+  % \node (nU) [right=of nh1, xshift=15mm] {};
+  % \node (nX) [right=of nU] {};
+  %  \pgfsetarrowsend{\threadArrow}
+  % \draw (nU.north east) -- (nX.north west);
+  % \node (nV) [right=of nX, align=left,xshift=-13mm, yshift=-1.65mm] {Inter--thread,\\
+  %   intra-process};
+
+  % %Process arrows
+  % \node (nG) [right=of nX, xshift=15mm] {};
+  % \node (nD) [right=of nG] {};
+  %  \pgfsetarrowsend{\processArrow}
+  % \draw  (nG.north east) -- (nD.north west);
+  % \node (nP) [right=of nD, align=left, xshift=-13mm, yshift=-1.65mm] {Inter-process \\(i.e. Unix pipe)};
+
+  % \begin{pgfonlayer}{background}
+  %   \node [sInnerLegend, fit=(nspacer1)(startX)(nh1)(n2)(nU) (nX)(nV)(nD)(nG)(nP) (ndata) (nxmachine) (nxprocess)    (nxthread) (nbbb)]  {};
+  % \end{pgfonlayer}  
+  %
+  \begin{pgfonlayer}{background}
+%    \node [sLegend, fit=(nspacer1) (ndata) (nxmachine) (nxprocess)
+    \node [sLegend, fit=(nxmachine) (nxprocess)(nxcore)(nbbb)(nxthread)]{};
+%    (nxthread) (nbbb) (n0)(nh1)(n2)(nU) (nX)(nV)(nD)(nG)(nP)]  {};
+%    (nxthread) (nbbb)]  {};
+  \end{pgfonlayer}
+
+  % \begin{pgfonlayer}{background}
+  %   \node [sLegend, fit=(nh1)(n2)(nU) (nX)(nV)(nD)(nG)(nP)]  {};
+  % \end{pgfonlayer}
+}
+
+
+\def\firstNodes{(nA) (nB)}
+\def\secondNodes{(nC) (nD)}
+\def\taskNodes{\firstNodes \secondNodes}
+%\def\allNodes{(nDataIn) \taskNodes (nResults)}
+\def\allNodes{ \taskNodes}
+
+
+\setAllX{17mm}
+\def\xshiftC{19.5mm}
+\def\xshiftA{5mm}
+\def\xshiftB{17mm}
+\def\xshiftC{19mm}
+\def\xshiftD{17mm}
+\def\xshiftE{5mm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+
+%   \nodes{nDataIn}{nA}{nB}{nC}{nD}{nResults}{}
+   \nodes{nA}{nB}{nC}{nD}
+   \edges{\processArrow}{\methodArrow}{\methodArrow}{\methodArrow}{}{}
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncore}
+   \processBack{\lmiddle}{\taskNodes}{nprocess}
+   \threadBack{\linner}{\taskNodes}{nthread}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+
+
+ \hypertarget{AA}{ }
+ \caption{
+        Single pipeline; 
+        single machine; 
+        single processor; 
+        single core; 
+        single process, 
+        single thread
+}
+
+
+
+\end{figure}
+ \ifbool{links}{                 
+ \vspace*{1cm}
+{\bf Change architecture}
+\vspace*{2mm}
+
+ \hyperlink{BB}{[Add Threads]}
+\vspace{2mm}
+
+ \hyperlink{CC}{[Add Processes]}
+\vspace{2mm}
+
+ \hyperlink{QQ}{[Add Pipelines]}
+}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\nodes{nDataIn}{nA}{nB}{nC}{nD}{nResults}{, xshift=5mm}
+   %
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}
+   \edges{\processArrow}{\methodArrow}{\threadArrow}{\methodArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncore}
+   \processBack{\lmiddle}{\taskNodes}{nprocess}
+   \threadBack{\linner}{\firstNodes}{nthread1}
+   \threadBack{\linner}{\secondNodes}{nthread2}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{BB}{ }
+ \caption{
+ \ifbool{ids}{BB\ }{}
+        Single pipeline; 
+        single machine; 
+        single processor; 
+        single core; 
+        single process, 
+        {\bf two threads}
+}
+
+ \ifbool{links}{                
+        \vspace*{1cm}  
+        \hyperlink{AA}{Reduce Threads}\\
+        \hyperlink{X6}{Add Threads}\\
+         \hyperlink{CC}{Add processes}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\nodes{nDataIn}{nA}{nB}{nC}{nD}{nResults}{, xshift=5mm}
+   %
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}
+   \edges{\processArrow}{\methodArrow}{\threadArrow}{\methodArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncore}
+   \processBack{\lmiddle}{\taskNodes}{nprocess}
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{X6}{ }
+
+ \caption{
+        Single pipeline; 
+        single machine; 
+        single processor; 
+        single core; 
+        single process, 
+        {\bf four threads}
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{BB}{Reduce Threads}\\
+         \hyperlink{DD}{Add processes}\\
+         \hyperlink{M9}{Add Pipelines}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+
+
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\nodes{nDataIn}{nA}{nB}{nC}{nD}{nResults}{, xshift=5mm}
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}
+   \edges{\processArrow}{\methodArrow}{\processArrow}{\methodArrow}{}{nDataIn}
+
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncore}
+   \processBack{\lmiddle}{\firstNodes}{nprocess}
+   \processBack{\lmiddle}{\secondNodes}{nprocess}
+   \threadBack{\linner}{\firstNodes}{nthread1}
+   \threadBack{\linner}{\secondNodes}{nthread2}   
+   \vspace{5cm}
+   \nodes{z1}{z2}{z3}{z4}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{CC}{ }
+ \caption{
+        Single pipeline; 
+        single machine; 
+        single processor; 
+        single core; 
+        {\bf two processes}, 
+        {\bf two threads (one per process)}
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{EE999}{Add Cores}\\
+         \hyperlink{DD}{Add Threads}\\
+         \hyperlink{BB}{Reduce Processes}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\nodes{nDataIn}{nA}{nB}{nC}{nD}{nResults}{, xshift=5mm}
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}{, xshift=5mm}{}
+   \edges{\processArrow}{\threadArrow}{\processArrow}{\threadArrow}{}{nDataIn}
+
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncore}
+   \processBack{\lmiddle}{\firstNodes}{nprocess}
+   \processBack{\lmiddle}{\secondNodes}{nprocess}
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{DD}{ }
+ \caption{
+        Single pipeline; 
+        single machine; 
+        single processor; 
+        single core; 
+        two processes, 
+        {\bf four threads (two per process)}
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{CC}{Reduce Threads}\\
+         \hyperlink{H87}{Add Processes}\\
+         \hyperlink{GG}{Add Cores}
+        }{}
+
+
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\nodes{nDataIn}{nA}{nB}{nC}{nD}{nResults}{, xshift=5mm}
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{, xshift=5mm}{, xshift=5mm}
+   \edges{\processArrow}{\threadArrow}{\processArrow}{\threadArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncore}
+   \processBack{\lmiddle}{(nA)}{nprocess}
+   \processBack{\lmiddle}{(nB)}{nprocess}
+   \processBack{\lmiddle}{(nC)}{nprocess}
+   \processBack{\lmiddle}{(nD)}{nprocess}
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{H87}{ }
+ \caption{
+        Single pipeline; 
+        single machine; 
+        single processor; 
+        single core; 
+        {\bf four processes}, 
+        {\bf four threads (one per process)}
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{DD}{Reduce Processes}\\
+         \hyperlink{HH}{Add Cores}
+        }{}
+\end{figure}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\nodes{nDataIn}{nA}{nB}{nC}{nD}{nResults}{, xshift=5mm}
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}{, xshift=13mm}{}
+   \edges{\processArrow}{\methodArrow}{\processArrow}{\methodArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\firstNodes}{ncore1}
+   \coreBack{\louter}{\secondNodes}{ncore2}
+   \processBack{\lmiddle}{\firstNodes}{nprocess1}
+   \processBack{\lmiddle}{\secondNodes}{nprocess2}
+   \threadBack{\linner}{\firstNodes}{nthread1}
+   \threadBack{\linner}{\secondNodes}{nthread2}   
+   
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{FF}{ }
+ \caption{
+      Single pipeline; 
+        single machine; 
+        single processor; 
+        {\bf two cores}; 
+        {\bf two processes (one per core)}, 
+        {\bf two threads (one per process)}
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{BB}{Reduce Processes}\\
+         \hyperlink{GG}{Add Threads}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}{, xshift=13mm}{, xshift=5mm}
+   \edges{\processArrow}{\threadArrow}{\processArrow}{\threadArrow}{}{nDataIn}
+
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncoreOuter}
+   \processBack{\lmiddle}{\firstNodes}{nprocess1}
+   \processBack{\lmiddle}{\secondNodes}{nprocess2}
+
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{GG}{ }
+ \caption{
+        Single pipeline; 
+        single machine; 
+        single processor; 
+        {\bf two cores}; 
+        {\bf two processes (one per core)}, 
+        {\bf four threads (two per process)}
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{FF}{Reduce Threads}\\
+         \hyperlink{DD}{Reduce Cores}\\
+         \hyperlink{HH}{Add Processes}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}
+   \edges{\processArrow}{\processArrow}{\processArrow}{\processArrow}{}{nDataIn}
+
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+   \coreBack{\louter}{\taskNodes}{ncoreOuter}
+
+   \processBack{\lmiddle}{(nA)}{nprocess1}
+   \processBack{\lmiddle}{(nB)}{nprocess2}
+   \processBack{\lmiddle}{(nC)}{nprocess3}
+   \processBack{\lmiddle}{(nD)}{nprocess4}
+
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{HH}{ }
+ \caption{HH Single machine, quad core, single pipeline, 
+   four processes, each with one thread}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{GG}{Reduce Processes}\\
+         \hyperlink{H87}{Reduce Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}
+   \edges{\processArrow}{\processArrow}{\processArrow}{\processArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\taskNodes}{nchip}        
+
+   \coreBack{\louter}{(nA)}{ncoreOuterA}
+   \coreBack{\louter}{(nB)}{ncoreOuterB}
+   \coreBack{\louter}{(nC)}{ncoreOuterC}
+   \coreBack{\louter}{(nD)}{ncoreOuterD}
+
+   \processBack{\lmiddle}{(nA)}{nprocess1}
+   \processBack{\lmiddle}{(nB)}{nprocess2}
+   \processBack{\lmiddle}{(nC)}{nprocess3}
+   \processBack{\lmiddle}{(nD)}{nprocess4}
+
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{H19}{ }
+ \caption{
+    Single pipeline; 
+        single machine; 
+        single processor; 
+        {\bf four cores}; 
+        {\bf four processes (one per core)}, 
+        {\bf four threads (one per process)}
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{GG}{Reduce Processes}\\
+         \hyperlink{H87}{Reduce Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}
+   \edges{\processArrow}{\processArrow}{\processArrow}{\processArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{\firstNodes}{nchip}        
+   \chipBack{\lmidOuter}{\secondNodes}{nchip}        
+
+   \coreBack{\louter}{(nA)}{ncoreOuterA}
+   \coreBack{\louter}{(nB)}{ncoreOuterB}
+   \coreBack{\louter}{(nC)}{ncoreOuterC}
+   \coreBack{\louter}{(nD)}{ncoreOuterD}
+
+   \processBack{\lmiddle}{(nA)}{nprocess1}
+   \processBack{\lmiddle}{(nB)}{nprocess2}
+   \processBack{\lmiddle}{(nC)}{nprocess3}
+   \processBack{\lmiddle}{(nD)}{nprocess4}
+
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{X089}{ }
+ \caption{
+   Single pipeline; 
+        single machine; 
+        {\bf two processors}; 
+        {\bf four cores (two per processor)}; 
+        {\bf four processes (one per core)}, 
+        {\bf four threads (one per process)}
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{GG}{Reduce Processes}\\
+         \hyperlink{H87}{Reduce Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}
+   \edges{\processArrow}{\processArrow}{\processArrow}{\processArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{\allNodes}{nmachine}
+   \chipBack{\lmidOuter}{(nA)}{nchip}        
+   \chipBack{\lmidOuter}{(nB)}{nchip}        
+   \chipBack{\lmidOuter}{(nC)}{nchip}        
+   \chipBack{\lmidOuter}{(nD)}{nchip}        
+
+   \coreBack{\louter}{(nA)}{ncoreOuterA}
+   \coreBack{\louter}{(nB)}{ncoreOuterB}
+   \coreBack{\louter}{(nC)}{ncoreOuterC}
+   \coreBack{\louter}{(nD)}{ncoreOuterD}
+
+   \processBack{\lmiddle}{(nA)}{nprocess1}
+   \processBack{\lmiddle}{(nB)}{nprocess2}
+   \processBack{\lmiddle}{(nC)}{nprocess3}
+   \processBack{\lmiddle}{(nD)}{nprocess4}
+
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{R098}{ }
+ \caption{
+  Single pipeline; 
+        single machine; 
+        {\bf four processors}; 
+        {\bf four cores (one per processor)}; 
+        four processes (one per core), 
+        four threads (one per process)
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{GG}{Reduce Processes}\\
+         \hyperlink{H87}{Reduce Cores}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}
+   \edges{\processArrow}{\processArrow}{\processArrow}{\processArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{(nA)(nB)}{nmachine0}
+   \machineBack{\lfarOuter}{(nC)(nD)}{nmachine3}
+
+   \chipBack{\lmidOuter}{(nA)(nB)}{nchip}        
+   \chipBack{\lmidOuter}{(nC)(nD)}{nchip}        
+
+   \coreBack{\louter}{(nA)}{ncoreOuterA}
+   \coreBack{\louter}{(nB)}{ncoreOuterB}
+   \coreBack{\louter}{(nC)}{ncoreOuterC}
+   \coreBack{\louter}{(nD)}{ncoreOuterD}
+
+   \processBack{\lmiddle}{(nA)}{nprocess1}
+   \processBack{\lmiddle}{(nB)}{nprocess2}
+   \processBack{\lmiddle}{(nC)}{nprocess3}
+   \processBack{\lmiddle}{(nD)}{nprocess4}
+
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{Z895}{ }
+ \caption{
+  Single pipeline; 
+        {\bf two machines}; 
+        {\bf two processors (one per machine)}; 
+        {\bf four cores (two per processor)}; 
+        four processes (one per core), 
+        four threads (one per process)
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{GG}{Reduce Processes}\\
+         \hyperlink{H87}{Reduce Cores}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \def\inputx{Data}
+   \def\resultsx{Data}
+   \nodes{nA}{nB}{nC}{nD}%{nResults}{}
+   \edges{\processArrow}{\processArrow}{\processArrow}{\processArrow}{}{nDataIn}
+
+   \machineBack{\lfarOuter}{(nA)}{nmachine0}
+   \machineBack{\lfarOuter}{(nB)}{nmachine1}
+   \machineBack{\lfarOuter}{(nC)}{nmachine2}
+   \machineBack{\lfarOuter}{(nD)}{nmachine3}
+
+   \chipBack{\lmidOuter}{(nA)}{nchip}        
+   \chipBack{\lmidOuter}{(nB)}{nchip}        
+   \chipBack{\lmidOuter}{(nC)}{nchip}        
+   \chipBack{\lmidOuter}{(nD)}{nchip}        
+
+   \coreBack{\louter}{(nA)}{ncoreOuterA}
+   \coreBack{\louter}{(nB)}{ncoreOuterB}
+   \coreBack{\louter}{(nC)}{ncoreOuterC}
+   \coreBack{\louter}{(nD)}{ncoreOuterD}
+
+   \processBack{\lmiddle}{(nA)}{nprocess1}
+   \processBack{\lmiddle}{(nB)}{nprocess2}
+   \processBack{\lmiddle}{(nC)}{nprocess3}
+   \processBack{\lmiddle}{(nD)}{nprocess4}
+
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{B95}{ }
+ \caption{
+        {\bf four machines}; 
+        {\bf four processors (one per machine}; 
+        {\bf four cores (one per processor)}; 
+        four processes (one per core), 
+        four threads (one per process)
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{GG}{Reduce Processes}\\
+         \hyperlink{H87}{Reduce Cores}
+        }{}
+\end{figure}
+
+
+
+
+
+\newcommand{\drawM}[1]{
+   \nodes{nA}{nB}{nC}{nD}
+%   \edges{\methodArrow}{\methodArrow}{\methodArrow}{}{nDataIn}
+
+   \nodesX{nA1}{nB1}{nC1}{nD1}{,below of=nA, yshift=#1}
+
+   \nodesX{nA2}{nB2}{nC2}{nD2}{,below of=nA1, yshift=#1}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Pipelines
+%
+\setAllX{17mm}
+%\def\xshiftA{4mm}
+%\def\xshiftE{4mm}
+\def\pipeSep{-22mm}
+\def\xshiftC{20mm}
+\def\xshiftA{2mm}
+\def\xshiftB{18mm}
+\def\xshiftC{19mm}
+\def\xshiftD{18mm}
+\def\xshiftE{2mm}
+\def\lfarOuter{9mm}
+\def\lmidOuter{0.90cm}
+\def\lStretchedFarOuter{11.7mm}
+
+%NEW
+\setAllX{17mm}
+%\def\xshiftA{4mm}
+%\def\xshiftE{4mm}
+\def\pipeSep{-27mm}
+\def\xshiftC{22mm}
+\def\xshiftA{7mm}
+\def\xshiftB{22mm}
+\def\xshiftC{24.5mm}
+\def\xshiftD{22mm}
+\def\xshiftE{7mm}
+\def\lfarOuter{9mm}
+\def\lmidOuter{0.90cm}
+\def\lStretchedFarOuter{16.1mm}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes
+     (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \processBack{\lmiddle}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nprocess0}
+
+   \threadBack{\linner}{\taskNodes (nA1)(nB1)(nC1)(nD1) (nA2)(nB2)(nC2)(nD2)}{nthread0}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{W95}{ }
+ \caption{
+ \ifbool{ids}{W95}
+        {\bf Three pipelines}; 
+        one machine; 
+        one processor;
+        one core;
+        one process;
+        one thread;
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+
+   \machineBack{\lthistOuter}{\allNodes
+     (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \processBack{\lmiddle}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nprocess0}
+
+   \threadBack{\linner}{(nA)(nA1)(nA2)}{nthread0}
+   \threadBack{\linner}{(nB)(nB1)(nB2)}{nthread1}
+   \threadBack{\linner}{(nC)(nC1)(nC2)}{nthread2}
+   \threadBack{\linner}{(nD)(nD1)(nD2)}{nthread3}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{Y76}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        one core;
+        one process;
+        {\bf four threads};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes
+     (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+
+   %\processBack{\lmiddle}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nprocess0}
+
+   \processBack{\lmiddle}{(nA)(nA1)(nA2)}{nprocess0}
+   \processBack{\lmiddle}{(nB)(nB1)(nB2)}{nprocess1}
+   \processBack{\lmiddle}{(nC)(nC1)(nC2)}{nprocess2}
+   \processBack{\lmiddle}{(nD)(nD1)(nD2)}{nprocess3}
+
+   \threadBack{\linner}{(nA)(nA1)(nA2)}{nthread0}
+   \threadBack{\linner}{(nB)(nB1)(nB2)}{nthread1}
+   \threadBack{\linner}{(nC)(nC1)(nC2)}{nthread2}
+   \threadBack{\linner}{(nD)(nD1)(nD2)}{nthread3}
+
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{J7}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        one core;
+        {\bf four processes};
+        four threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes
+     (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+
+
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+
+   \coreBack{\louter}{(nA)(nA1)(nA2)}{ncore0}
+   \coreBack{\louter}{(nB)(nB1)(nB2)}{ncore1}
+   \coreBack{\louter}{(nC)(nC1)(nC2)}{ncore2}
+   \coreBack{\louter}{(nD)(nD1)(nD2)}{ncore3}
+
+   \processBack{\lmiddle}{(nA)(nA1)(nA2)}{nprocess0}
+   \processBack{\lmiddle}{(nB)(nB1)(nB2)}{nprocess1}
+   \processBack{\lmiddle}{(nC)(nC1)(nC2)}{nprocess2}
+   \processBack{\lmiddle}{(nD)(nD1)(nD2)}{nprocess3}
+
+   \threadBack{\linner}{(nA)(nA1)(nA2)}{nthread0}
+   \threadBack{\linner}{(nB)(nB1)(nB2)}{nthread1}
+   \threadBack{\linner}{(nC)(nC1)(nC2)}{nthread2}
+   \threadBack{\linner}{(nD)(nD1)(nD2)}{nthread3}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{E8}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        {\bf four cores};
+        four processes (one per core);
+        four threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+
+   \machineBack{\lthistOuter}{\allNodes       
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+
+   \coreBack{\louter}{(nA)(nA1)(nA2)}{ncore0}
+   \coreBack{\louter}{(nB)(nB1)(nB2)}{ncore1}
+   \coreBack{\louter}{(nC)(nC1)(nC2)}{ncore2}
+   \coreBack{\louter}{(nD)(nD1)(nD2)}{ncore3}
+
+   \processBack{\lmiddle}{(nA)(nA1)(nA2)}{nprocess0}
+   \processBack{\lmiddle}{(nB)(nB1)(nB2)}{nprocess1}
+   \processBack{\lmiddle}{(nC)(nC1)(nC2)}{nprocess2}
+   \processBack{\lmiddle}{(nD)(nD1)(nD2)}{nprocess3}
+
+   \threadBack{\linner}{(nA)}{nthreadA0}
+   \threadBack{\linner}{(nA1)}{nthreadA1}
+   \threadBack{\linner}{(nA2)}{nthreadA2}
+   \threadBack{\linner}{(nB)}{nthreadB0}
+   \threadBack{\linner}{(nB1)}{nthreadB1}
+   \threadBack{\linner}{(nB2)}{nthreadB2}
+   \threadBack{\linner}{(nC)}{nthreadC0}
+   \threadBack{\linner}{(nC1)}{nthreadC1}
+   \threadBack{\linner}{(nC2)}{nthreadC2}
+   \threadBack{\linner}{(nD)}{nthreadD0}
+   \threadBack{\linner}{(nD1)}{nthreadD1}
+   \threadBack{\linner}{(nD2)}{nthreadD2}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{Z5}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        four cores;
+        four processes (one per core);
+        twelve threads (three per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+
+   \coreBack{\louter}{(nA)(nA1)(nA2)}{ncore0}
+   \coreBack{\louter}{(nB)(nB1)(nB2)}{ncore1}
+   \coreBack{\louter}{(nC)(nC1)(nC2)}{ncore2}
+   \coreBack{\louter}{(nD)(nD1)(nD2)}{ncore3}
+
+   \processBack{\lmiddle}{(nA)}{nprocessA0}
+   \processBack{\lmiddle}{(nA1)}{nprocessA1}
+   \processBack{\lmiddle}{(nA2)}{nprocessA2}
+   \processBack{\lmiddle}{(nB)}{nprocessB0}
+   \processBack{\lmiddle}{(nB1)}{nprocessB1}
+   \processBack{\lmiddle}{(nB2)}{nprocessB2}
+   \processBack{\lmiddle}{(nC)}{nprocessC0}
+   \processBack{\lmiddle}{(nC1)}{nprocessC1}
+   \processBack{\lmiddle}{(nC2)}{nprocessC2}
+   \processBack{\lmiddle}{(nD)}{nprocessD0}
+   \processBack{\lmiddle}{(nD1)}{nprocessD1}
+   \processBack{\lmiddle}{(nD2)}{nprocessD2}
+
+   \threadBack{\linner}{(nA)}{nthreadA0}
+   \threadBack{\linner}{(nA1)}{nthreadA1}
+   \threadBack{\linner}{(nA2)}{nthreadA2}
+   \threadBack{\linner}{(nB)}{nthreadB0}
+   \threadBack{\linner}{(nB1)}{nthreadB1}
+   \threadBack{\linner}{(nB2)}{nthreadB2}
+   \threadBack{\linner}{(nC)}{nthreadC0}
+   \threadBack{\linner}{(nC1)}{nthreadC1}
+   \threadBack{\linner}{(nC2)}{nthreadC2}
+   \threadBack{\linner}{(nD)}{nthreadD0}
+   \threadBack{\linner}{(nD1)}{nthreadD1}
+   \threadBack{\linner}{(nD2)}{nthreadD2}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{A56}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        four cores;
+        {\bf twelve processes (three per core)};
+        twelve threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+\ \ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+
+   \machineBack{\lthistOuter}{\allNodes
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+
+
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+
+   \coreBack{\louter}{(nA)}{ncoreA0}
+   \coreBack{\louter}{(nA1)}{ncoreA1}
+   \coreBack{\louter}{(nA2)}{ncoreA2}
+   \coreBack{\louter}{(nB)}{ncoreB0}
+   \coreBack{\louter}{(nB1)}{ncoreB1}
+   \coreBack{\louter}{(nB2)}{ncoreB2}
+   \coreBack{\louter}{(nC)}{ncoreC0}
+   \coreBack{\louter}{(nC1)}{ncoreC1}
+   \coreBack{\louter}{(nC2)}{ncoreC2}
+   \coreBack{\louter}{(nD)}{ncoreD0}
+   \coreBack{\louter}{(nD1)}{ncoreD1}
+   \coreBack{\louter}{(nD2)}{ncoreD2}
+
+   \processBack{\lmiddle}{(nA)}{nprocessA0}
+   \processBack{\lmiddle}{(nA1)}{nprocessA1}
+   \processBack{\lmiddle}{(nA2)}{nprocessA2}
+   \processBack{\lmiddle}{(nB)}{nprocessB0}
+   \processBack{\lmiddle}{(nB1)}{nprocessB1}
+   \processBack{\lmiddle}{(nB2)}{nprocessB2}
+   \processBack{\lmiddle}{(nC)}{nprocessC0}
+   \processBack{\lmiddle}{(nC1)}{nprocessC1}
+   \processBack{\lmiddle}{(nC2)}{nprocessC2}
+   \processBack{\lmiddle}{(nD)}{nprocessD0}
+   \processBack{\lmiddle}{(nD1)}{nprocessD1}
+   \processBack{\lmiddle}{(nD2)}{nprocessD2}
+
+   \threadBack{\linner}{(nA)}{nthreadA0}
+   \threadBack{\linner}{(nA1)}{nthreadA1}
+   \threadBack{\linner}{(nA2)}{nthreadA2}
+   \threadBack{\linner}{(nB)}{nthreadB0}
+   \threadBack{\linner}{(nB1)}{nthreadB1}
+   \threadBack{\linner}{(nB2)}{nthreadB2}
+   \threadBack{\linner}{(nC)}{nthreadC0}
+   \threadBack{\linner}{(nC1)}{nthreadC1}
+   \threadBack{\linner}{(nC2)}{nthreadC2}
+   \threadBack{\linner}{(nD)}{nthreadD0}
+   \threadBack{\linner}{(nD1)}{nthreadD1}
+   \threadBack{\linner}{(nD2)}{nthreadD2}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{F07}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        {\bf twelve cores};
+        twelve processes ({\bf one per core});
+        twelve threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \processBack{\lmiddle}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nprocess0}
+
+   \threadBack{\linner}{\taskNodes}{nthread1}
+   \threadBack{\linner}{(nA1)(nB1)(nC1)(nD1)}{nthread2}
+   \threadBack{\linner}{(nA2)(nB2)(nC2)(nD2)}{nthread3}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{D76}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        {\bf one core};
+        {\bf one process};
+        {\bf three threads (four per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes  
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \processBack{\lmiddle}{\taskNodes}{nprocess1}
+   \processBack{\lmiddle}{(nA1)(nB1)(nC1)(nD1)}{nprocess2}
+   \processBack{\lmiddle}{(nA2)(nB2)(nC2)(nD2)}{nprocess3}
+
+   \threadBack{\linner}{\taskNodes}{nthread1}
+   \threadBack{\linner}{(nA1)(nB1)(nC1)(nD1)}{nthread2}
+   \threadBack{\linner}{(nA2)(nB2)(nC2)(nD2)}{nthread3}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{QQ}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        one core;
+        {\bf three processes};
+        {\bf three threads (one per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes  
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes}{ncore1}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   \processBack{\lmiddle}{\taskNodes}{nprocess0}
+   \processBack{\lmiddle}{(nA1)(nB1)(nC1)(nD1)}{nprocess1}
+   \processBack{\lmiddle}{(nA2)(nB2)(nC2)(nD2)}{nprocess2}
+   \threadBack{\linner}{\taskNodes}{nthread0}
+   \threadBack{\linner}{(nA1)(nB1)(nC1)(nD1)}{nthread1}
+   \threadBack{\linner}{(nA2)(nB2)(nC2)(nD2)}{nthread2}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{JJ}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        {\bf three cores};
+        three processes {\bf (one per core)};
+        three threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{QQ}{Reduce Cores}\\
+         \hyperlink{M9}{Add Threads} \\
+         \hyperlink{K3}{Add Processes} \\
+        }{}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes  
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes}{ncore1}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %Processes
+   \processBack{\lmiddle}{\taskNodes}{nprocess0}
+   \processBack{\lmiddle}{(nA1)(nB1)(nC1)(nD1)}{nprocess1}
+   \processBack{\lmiddle}{(nA2)(nB2)(nC2)(nD2)}{nprocess2}
+   %Threads
+   %
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   %
+   \threadBack{\linner}{(nA1)}{nthread11}
+   \threadBack{\linner}{(nB1)}{nthread12}
+   \threadBack{\linner}{(nC1)}{nthread13}
+   \threadBack{\linner}{(nD1)}{nthread14}
+   %
+   \threadBack{\linner}{(nA2)}{nthread21}
+   \threadBack{\linner}{(nB2)}{nthread22}
+   \threadBack{\linner}{(nC2)}{nthread23}
+   \threadBack{\linner}{(nD2)}{nthread24}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{M9}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        three cores;
+        three processes (one per core);
+        {\bf twelve threads (four per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{M9}{Reduce Cores}\\
+         \hyperlink{X6}{Reduce Pipelines}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+%   \def\xshift{8mm}
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes  
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes}{ncore1}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %Processes
+   \processBack{\lmiddle}{(nA)(nB)}{nprocess0}
+  \processBack{\lmiddle}{(nC)(nD)}{nprocess2}
+%
+   \processBack{\lmiddle}{(nA1)(nB1)}{nprocess10}
+   \processBack{\lmiddle}{(nC1)(nD1)}{nprocess12}
+%
+   \processBack{\lmiddle}{(nA2)(nB2)}{nprocess20}
+   \processBack{\lmiddle}{(nC2)(nD2)}{nprocess22}
+   %Threads
+   %
+   \threadBack{\linner}{(nA)(nB)}{nthread1}
+   \threadBack{\linner}{(nC)(nD)}{nthread3}
+   %
+   \threadBack{\linner}{(nA1)(nB1)}{nthread11}
+   \threadBack{\linner}{(nC1)(nD1)}{nthread13}
+   %
+   \threadBack{\linner}{(nA2)(nB2)}{nthread21}
+   \threadBack{\linner}{(nC2)(nD2)}{nthread23}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{S9}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        three cores;
+        {\bf six processes (two per core)};
+        {\bf six threads (one per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+        \hyperlink{M9}{Reduce Processes}\\
+        \hyperlink{M87}{Add Cores}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+%   \def\xshift{8mm}
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes 
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes}{ncore1}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %Processes
+   \processBack{\lmiddle}{(nA)(nB)}{nprocess0}
+  \processBack{\lmiddle}{(nC)(nD)}{nprocess2}
+%
+   \processBack{\lmiddle}{(nA1)(nB1)}{nprocess10}
+   \processBack{\lmiddle}{(nC1)(nD1)}{nprocess12}
+%
+   \processBack{\lmiddle}{(nA2)(nB2)}{nprocess20}
+   \processBack{\lmiddle}{(nC2)(nD2)}{nprocess22}
+   %Threads
+   %
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   %
+   \threadBack{\linner}{(nA1)}{nthread11}
+   \threadBack{\linner}{(nB1)}{nthread12}
+   \threadBack{\linner}{(nC1)}{nthread13}
+   \threadBack{\linner}{(nD1)}{nthread14}
+   %
+   \threadBack{\linner}{(nA2)}{nthread21}
+   \threadBack{\linner}{(nB2)}{nthread22}
+   \threadBack{\linner}{(nC2)}{nthread23}
+   \threadBack{\linner}{(nD2)}{nthread24}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{P95}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        three cores;
+        six processes (two per core);
+        {\bf twelve threads (two per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+        \hyperlink{M9}{Reduce Processes}\\
+        \hyperlink{M87}{Add Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+%   \def\xshift{8mm}
+   \drawM{\pipeSep}
+
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes  
+        (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+   \coreBack{\louter}{\taskNodes}{ncore1}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %Processes
+   \processBack{\lmiddle}{(nA)}{nprocess0}
+  \processBack{\lmiddle}{(nB)}{nprocess1}
+  \processBack{\lmiddle}{(nC)}{nprocess2}
+  \processBack{\lmiddle}{(nD)}{nprocess3}
+%
+   \processBack{\lmiddle}{(nA1)}{nprocess10}
+   \processBack{\lmiddle}{(nB1)}{nprocess11}
+   \processBack{\lmiddle}{(nC1)}{nprocess12}
+   \processBack{\lmiddle}{(nD1)}{nprocess13}
+%
+   \processBack{\lmiddle}{(nA2)}{nprocess20}
+   \processBack{\lmiddle}{(nB2)}{nprocess21}
+   \processBack{\lmiddle}{(nC2)}{nprocess22}
+   \processBack{\lmiddle}{(nD2)}{nprocess23}
+   %Threads
+   %
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   %
+   \threadBack{\linner}{(nA1)}{nthread11}
+   \threadBack{\linner}{(nB1)}{nthread12}
+   \threadBack{\linner}{(nC1)}{nthread13}
+   \threadBack{\linner}{(nD1)}{nthread14}
+   %
+   \threadBack{\linner}{(nA2)}{nthread21}
+   \threadBack{\linner}{(nB2)}{nthread22}
+   \threadBack{\linner}{(nC2)}{nthread23}
+   \threadBack{\linner}{(nD2)}{nthread24}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{K3}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        three cores;
+        {\bf twelve processes (four per core)};
+        twelve threads {\bf (one per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+        \hyperlink{M9}{Reduce Processes}\\
+        \hyperlink{M87}{Add Cores}
+        }{}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+   % \def\xshiftA{9mm}
+   % \def\xshiftB{14mm}
+   % \def\xshiftC{14mm}
+   % \def\xshiftD{14mm}
+   % \def\xshiftE{9mm}
+
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes
+                (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{nmachine}
+
+   \chipBack{\lfarOuter}{\taskNodes (nA1)(nB1)(nC1)(nD1)(nA2)(nB2)(nC2)(nD2)}{ncore}
+
+   %\coreBack{\lmidOuter}{\taskNodes}{ncore1}
+   \coreBack{\louter}{(nA)}{ncore0}
+   \coreBack{\louter}{(nB)}{ncored1}
+   \coreBack{\louter}{(nC)}{ncore2}
+   \coreBack{\louter}{(nD)}{ncore3}
+   %\coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA1)}{ncore10}
+   \coreBack{\louter}{(nB1)}{ncored11}
+   \coreBack{\louter}{(nC1)}{ncore12}
+   \coreBack{\louter}{(nD1)}{ncore13}
+   %\coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   \coreBack{\louter}{(nA2)}{ncore20}
+   \coreBack{\louter}{(nB2)}{ncore21}
+   \coreBack{\louter}{(nC2)}{ncore22}
+   \coreBack{\louter}{(nD2)}{ncore23}
+
+   %Processes
+   \processBack{\lmiddle}{(nA)}{nprocess0}
+  \processBack{\lmiddle}{(nB)}{nprocess1}
+  \processBack{\lmiddle}{(nC)}{nprocess2}
+  \processBack{\lmiddle}{(nD)}{nprocess3}
+%
+   \processBack{\lmiddle}{(nA1)}{nprocess10}
+   \processBack{\lmiddle}{(nB1)}{nprocess11}
+   \processBack{\lmiddle}{(nC1)}{nprocess12}
+   \processBack{\lmiddle}{(nD1)}{nprocess13}
+%
+   \processBack{\lmiddle}{(nA2)}{nprocess20}
+   \processBack{\lmiddle}{(nB2)}{nprocess21}
+   \processBack{\lmiddle}{(nC2)}{nprocess22}
+   \processBack{\lmiddle}{(nD2)}{nprocess23}
+   % 
+
+   %Threads
+   %
+   \threadBack{\linner}{(nA)}{nthread1}
+   \threadBack{\linner}{(nB)}{nthread2}
+   \threadBack{\linner}{(nC)}{nthread3}
+   \threadBack{\linner}{(nD)}{nthread4}
+   %
+   \threadBack{\linner}{(nA1)}{nthread11}
+   \threadBack{\linner}{(nB1)}{nthread12}
+   \threadBack{\linner}{(nC1)}{nthread13}
+   \threadBack{\linner}{(nD1)}{nthread14}
+   %
+   \threadBack{\linner}{(nA2)}{nthread21}
+   \threadBack{\linner}{(nB2)}{nthread22}
+   \threadBack{\linner}{(nC2)}{nthread23}
+   \threadBack{\linner}{(nD2)}{nthread24}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{M87}{ }
+ \caption{
+       Three pipelines; 
+        one machine; 
+        one processor;
+        {\bf twelve cores};
+        twelve processes ({\bf one per core});
+        twelve threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+        %\hyperlink{M9}{Reduce Processes}
+        \hyperlink{M87}{Add Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes}{nmachine0}
+   \machineBack{\lthistOuter}{(nA1)(nB1)(nC1)(nD1)}{nmachine1}
+   \machineBack{\lthistOuter}{(nA2)(nB2)(nC2)(nD2)}{nmachine2}
+
+
+   \chipBack{\lfarOuter}{\taskNodes}{nmachine0}
+   \chipBack{\lfarOuter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \chipBack{\lfarOuter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+
+   %
+   \coreBack{\louter}{\taskNodes}{ncore0}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %
+   \processBack{\lmiddle}{\taskNodes}{nprocess1}
+   \processBack{\lmiddle}{(nA1)(nB1)(nC1)(nD1)}{nprocess2}
+   \processBack{\lmiddle}{(nA2)(nB2)(nC2)(nD2)}{nprocess3}
+
+   \threadBack{\linner}{\taskNodes}{nthread1}
+   \threadBack{\linner}{(nA1)(nB1)(nC1)(nD1)}{nthread2}
+   \threadBack{\linner}{(nA2)(nB2)(nC2)(nD2)}{nthread3}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{Q85}{ }
+ \caption{
+       Three pipelines; 
+        {\bf three machines}; 
+        {\bf three processors (one per machine)};
+        {\bf three cores (one per processor)};
+        {\bf three processes (one per core});
+        {\bf three threads (one per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes}{nmachine0}
+   %
+   \chipBack{\lfarOuter}{\taskNodes}{nmachine0}
+   \chipBack{\lfarOuter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \chipBack{\lfarOuter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %
+   \coreBack{\louter}{\taskNodes}{ncore0}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %
+   \processBack{\lmiddle}{\taskNodes}{nprocess1}
+   \processBack{\lmiddle}{(nA1)(nB1)(nC1)(nD1)}{nprocess2}
+   \processBack{\lmiddle}{(nA2)(nB2)(nC2)(nD2)}{nprocess3}
+   %
+   \threadBack{\linner}{(nA)(nB)}{nthread10}
+   \threadBack{\linner}{(nC)(nD)}{nthread10}
+   \threadBack{\linner}{(nA1)(nB1)}{nthread20}
+   \threadBack{\linner}{(nC1)(nD1)}{nthread21}
+   \threadBack{\linner}{(nA2)(nB2)}{nthread30}
+   \threadBack{\linner}{(nC2)(nD2)}{nthread31}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{T8}{ }
+ \caption{
+       Three pipelines; 
+        three machines; 
+        three processors (one per machine);
+        three cores (one per processor);
+        three processes (one per core);
+        {\bf six threads (two per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes}{nmachine0}
+   %
+   \chipBack{\lfarOuter}{\taskNodes}{nmachine0}
+   \chipBack{\lfarOuter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \chipBack{\lfarOuter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+%
+   \coreBack{\louter}{\taskNodes}{ncore0}
+   \coreBack{\louter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \coreBack{\louter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %
+   \processBack{\lmiddle}{(nA)(nB)}{nprocess10}
+   \processBack{\lmiddle}{(nC)(nD)}{nprocess11}
+   \processBack{\lmiddle}{(nA1)(nB1)}{nprocess20}
+   \processBack{\lmiddle}{(nC1)(nD1)}{nprocess21}
+   \processBack{\lmiddle}{(nA2)(nB2)}{nprocess30}
+   \processBack{\lmiddle}{(nC2)(nD2)}{nprocess31}
+   %
+   \threadBack{\linner}{(nA)(nB)}{nthread10}
+   \threadBack{\linner}{(nC)(nD)}{nthread10}
+   \threadBack{\linner}{(nA1)(nB1)}{nthread20}
+   \threadBack{\linner}{(nC1)(nD1)}{nthread21}
+   \threadBack{\linner}{(nA2)(nB2)}{nthread30}
+   \threadBack{\linner}{(nC2)(nD2)}{nthread31}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{X4}{ }
+ \caption{
+       Three pipelines; 
+        three machines; 
+        three processors (one per machine);
+        three cores (one per processor);
+        {\bf six processes (two per core)};
+        six threads ({\bf one per process});
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes}{nmachine0}
+   %
+   \chipBack{\lfarOuter}{\taskNodes}{nmachine0}
+   \chipBack{\lfarOuter}{(nA1)(nB1)(nC1)(nD1)}{ncore1}
+   \chipBack{\lfarOuter}{(nA2)(nB2)(nC2)(nD2)}{ncore2}
+   %
+   \coreBack{\louter}{(nA)(nB)}{ncore00}
+   \coreBack{\louter}{(nC)(nD)}{ncore00}
+   \coreBack{\louter}{(nA1)(nB1)}{ncore10}
+   \coreBack{\louter}{(nC1)(nD1)}{ncore11}
+   \coreBack{\louter}{(nA2)(nB2)}{ncore20}
+   \coreBack{\louter}{(nC2)(nD2)}{ncore21}
+   %
+   \processBack{\lmiddle}{(nA)(nB)}{nprocess10}
+   \processBack{\lmiddle}{(nC)(nD)}{nprocess11}
+   \processBack{\lmiddle}{(nA1)(nB1)}{nprocess20}
+   \processBack{\lmiddle}{(nC1)(nD1)}{nprocess21}
+   \processBack{\lmiddle}{(nA2)(nB2)}{nprocess30}
+   \processBack{\lmiddle}{(nC2)(nD2)}{nprocess31}
+   %
+   \threadBack{\linner}{(nA)(nB)}{nthread10}
+   \threadBack{\linner}{(nC)(nD)}{nthread10}
+   \threadBack{\linner}{(nA1)(nB1)}{nthread20}
+   \threadBack{\linner}{(nC1)(nD1)}{nthread21}
+   \threadBack{\linner}{(nA2)(nB2)}{nthread30}
+   \threadBack{\linner}{(nC2)(nD2)}{nthread31}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{K63}{ }
+ \caption{
+       Three pipelines; 
+        three machines; 
+        three processors (one per machine);
+        {\bf six cores (two per processor)};
+        six processes ({\bf two per core});
+        six threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+
+
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{\allNodes}{nmachine0}
+   %
+   \chipBack{\lfarOuter}{(nA)(nB)}{ncore00}
+   \chipBack{\lfarOuter}{(nC)(nD)}{ncore00}
+   \chipBack{\lfarOuter}{(nA1)(nB1)}{ncore10}
+   \chipBack{\lfarOuter}{(nC1)(nD1)}{ncore11}
+   \chipBack{\lfarOuter}{(nA2)(nB2)}{ncore20}
+   \chipBack{\lfarOuter}{(nC2)(nD2)}{ncore21}
+   %
+   \coreBack{\louter}{(nA)(nB)}{ncore00}
+   \coreBack{\louter}{(nC)(nD)}{ncore00}
+   \coreBack{\louter}{(nA1)(nB1)}{ncore10}
+   \coreBack{\louter}{(nC1)(nD1)}{ncore11}
+   \coreBack{\louter}{(nA2)(nB2)}{ncore20}
+   \coreBack{\louter}{(nC2)(nD2)}{ncore21}
+   %
+   \processBack{\lmiddle}{(nA)(nB)}{nprocess10}
+   \processBack{\lmiddle}{(nC)(nD)}{nprocess11}
+   \processBack{\lmiddle}{(nA1)(nB1)}{nprocess20}
+   \processBack{\lmiddle}{(nC1)(nD1)}{nprocess21}
+   \processBack{\lmiddle}{(nA2)(nB2)}{nprocess30}
+   \processBack{\lmiddle}{(nC2)(nD2)}{nprocess31}
+   %
+   \threadBack{\linner}{(nA)(nB)}{nthread10}
+   \threadBack{\linner}{(nC)(nD)}{nthread10}
+   \threadBack{\linner}{(nA1)(nB1)}{nthread20}
+   \threadBack{\linner}{(nC1)(nD1)}{nthread21}
+   \threadBack{\linner}{(nA2)(nB2)}{nthread30}
+   \threadBack{\linner}{(nC2)(nD2)}{nthread31}
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{A69}{ }
+ \caption{
+       Three pipelines; 
+        three machines; 
+        {\bf six processors (two per machine)};
+        six cores ({\bf one per processor});
+        six processes ({\bf one per core});
+        six threads (one per process);
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\def\xshiftC{15mm}
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+
+   \machineBack{\lthistOuter}{(nA)(nB)}{nmachine01}
+   \machineBack{\lthistOuter}{(nC)(nD)}{nmachine02}
+   \machineBack{\lthistOuter}{(nC1)(nD1)}{nmachine12}
+   \machineBack{\lthistOuter}{(nA2)(nB2)}{nmachine20}
+   \machineBack{\lthistOuter}{(nC2)(nD2)}{nmachine21}
+   %
+   \chipBack{\lfarOuter}{(nA)(nB)}{ncore00}
+   \chipBack{\lfarOuter}{(nC)(nD)}{ncore00}
+   \chipBack{\lfarOuter}{(nA1)(nB1)}{ncore10}
+   \chipBack{\lfarOuter}{(nC1)(nD1)}{ncore11}
+   \chipBack{\lfarOuter}{(nA2)(nB2)}{ncore20}
+   \chipBack{\lfarOuter}{(nC2)(nD2)}{ncore21}
+   %
+   %
+   \coreBack{\louter}{(nA)(nB)}{ncore00}
+   \coreBack{\louter}{(nC)(nD)}{ncore00}
+   \coreBack{\louter}{(nA1)(nB1)}{ncore10}
+   \coreBack{\louter}{(nC1)(nD1)}{ncore11}
+   \coreBack{\louter}{(nA2)(nB2)}{ncore20}
+   \coreBack{\louter}{(nC2)(nD2)}{ncore21}
+   %
+   \processBack{\lmiddle}{(nA)(nB)}{nprocess10}
+   \processBack{\lmiddle}{(nC)(nD)}{nprocess11}
+   \processBack{\lmiddle}{(nA1)(nB1)}{nprocess20}
+   \processBack{\lmiddle}{(nC1)(nD1)}{nprocess21}
+   \processBack{\lmiddle}{(nA2)(nB2)}{nprocess30}
+   \processBack{\lmiddle}{(nC2)(nD2)}{nprocess31}
+   %
+   \threadBack{\linner}{(nA)(nB)}{nthread10}
+   \threadBack{\linner}{(nC)(nD)}{nthread10}
+   \threadBack{\linner}{(nA1)(nB1)}{nthread20}
+   \threadBack{\linner}{(nC1)(nD1)}{nthread21}
+   \threadBack{\linner}{(nA2)(nB2)}{nthread30}
+   \threadBack{\linner}{(nC2)(nD2)}{nthread31}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{V98}{ }
+ \caption{
+       Three pipelines; 
+        {\bf six machines}; 
+        six processors ({\bf one per machine});
+        six cores ({\bf one per processor});
+        six processes ({\bf one per core});
+        six threads (one per process);
+}
+
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\def\xshiftC{15mm}
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+
+   \machineBack{\lthistOuter}{(nA)(nB)}{nmachine01}
+   \machineBack{\lthistOuter}{(nC)(nD)}{nmachine02}
+   \machineBack{\lthistOuter}{(nA1)(nB1)}{nmachine11}
+   \machineBack{\lthistOuter}{(nC1)(nD1)}{nmachine12}
+   \machineBack{\lthistOuter}{(nA2)(nB2)}{nmachine20}
+   \machineBack{\lthistOuter}{(nC2)(nD2)}{nmachine21}
+   %
+   \chipBack{\lfarOuter}{(nA)(nB)}{ncore00}
+   \chipBack{\lfarOuter}{(nC)(nD)}{ncore00}
+   \chipBack{\lfarOuter}{(nA1)(nB1)}{ncore10}
+   \chipBack{\lfarOuter}{(nC1)(nD1)}{ncore11}
+   \chipBack{\lfarOuter}{(nA2)(nB2)}{ncore20}
+   \chipBack{\lfarOuter}{(nC2)(nD2)}{ncore21}
+   %
+   \coreBack{\louter}{(nA)(nB)}{ncore00}
+   \coreBack{\louter}{(nC)(nD)}{ncore00}
+   \coreBack{\louter}{(nA1)(nB1)}{ncore10}
+   \coreBack{\louter}{(nC1)(nD1)}{ncore11}
+   \coreBack{\louter}{(nA2)(nB2)}{ncore20}
+   \coreBack{\louter}{(nC2)(nD2)}{ncore21}
+   %
+   \processBack{\lmiddle}{(nA)(nB)}{nprocess10}
+   \processBack{\lmiddle}{(nC)(nD)}{nprocess11}
+   \processBack{\lmiddle}{(nA1)(nB1)}{nprocess20}
+   \processBack{\lmiddle}{(nC1)(nD1)}{nprocess21}
+   \processBack{\lmiddle}{(nA2)(nB2)}{nprocess30}
+   \processBack{\lmiddle}{(nC2)(nD2)}{nprocess31}
+   %%
+   \threadBack{\linner}{(nA)}{nthread10}
+   \threadBack{\linner}{(nB)}{nthread11}
+   \threadBack{\linner}{(nC)}{nthread12}
+   \threadBack{\linner}{(nD)}{nthread13}%
+   \threadBack{\linner}{(nA1)}{nthread20}
+   \threadBack{\linner}{(nB1)}{nthread21}
+   \threadBack{\linner}{(nC1)}{nthread22}
+   \threadBack{\linner}{(nD1)}{nthread23}%
+   \threadBack{\linner}{(nA2)}{nthread30}
+   \threadBack{\linner}{(nB2)}{nthread31}
+   \threadBack{\linner}{(nC2)}{nthread32}
+   \threadBack{\linner}{(nD2)}{nthread33}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{A89}{ }
+ \caption{       
+        Three pipelines; 
+        six machines; 
+        six processors (one per machine);
+        six cores (one per processor);
+        six processes (one per core);
+        {\bf twelve threads (two per process)};
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   %\def\xshiftC{15mm}
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+%
+   \machineBack{\lthistOuter}{(nA)(nB)}{nmachine01}
+   \machineBack{\lthistOuter}{(nC)(nD)}{nmachine02}
+   \machineBack{\lthistOuter}{(nA1)(nB1)}{nmachine11}
+   \machineBack{\lthistOuter}{(nC1)(nD1)}{nmachine12}
+   \machineBack{\lthistOuter}{(nA2)(nB2)}{nmachine20}
+   \machineBack{\lthistOuter}{(nC2)(nD2)}{nmachine21}
+   %
+   \chipBack{\lfarOuter}{(nA)(nB)}{ncore00}
+   \chipBack{\lfarOuter}{(nC)(nD)}{ncore00}
+   \chipBack{\lfarOuter}{(nA1)(nB1)}{ncore10}
+   \chipBack{\lfarOuter}{(nC1)(nD1)}{ncore11}
+   \chipBack{\lfarOuter}{(nA2)(nB2)}{ncore20}
+   \chipBack{\lfarOuter}{(nC2)(nD2)}{ncore21}
+   %
+   \coreBack{\louter}{(nA)(nB)}{ncore00}
+   \coreBack{\louter}{(nC)(nD)}{ncore00}
+   \coreBack{\louter}{(nA1)(nB1)}{ncore10}
+   \coreBack{\louter}{(nC1)(nD1)}{ncore11}
+   \coreBack{\louter}{(nA2)(nB2)}{ncore20}
+   \coreBack{\louter}{(nC2)(nD2)}{ncore21}
+   %
+   \processBack{\lmiddle}{(nA)}{nprocess10}
+   \processBack{\lmiddle}{(nB)}{nprocess11}
+   \processBack{\lmiddle}{(nC)}{nprocess12}
+   \processBack{\lmiddle}{(nD)}{nprocess13}
+   \processBack{\lmiddle}{(nA1)}{nprocess20}
+   \processBack{\lmiddle}{(nB1)}{nprocess21}
+   \processBack{\lmiddle}{(nC1)}{nprocess22}
+   \processBack{\lmiddle}{(nD1)}{nprocess23}
+   \processBack{\lmiddle}{(nA2)}{nprocess30}
+   \processBack{\lmiddle}{(nB2)}{nprocess31}
+   \processBack{\lmiddle}{(nC2)}{nprocess32}
+   \processBack{\lmiddle}{(nD2)}{nprocess33}
+   %%
+   \threadBack{\linner}{(nA)}{nthread10}
+   \threadBack{\linner}{(nB)}{nthread11}
+   \threadBack{\linner}{(nC)}{nthread12}
+   \threadBack{\linner}{(nD)}{nthread13}%
+   \threadBack{\linner}{(nA1)}{nthread20}
+   \threadBack{\linner}{(nB1)}{nthread21}
+   \threadBack{\linner}{(nC1)}{nthread22}
+   \threadBack{\linner}{(nD1)}{nthread23}%
+   \threadBack{\linner}{(nA2)}{nthread30}
+   \threadBack{\linner}{(nB2)}{nthread31}
+   \threadBack{\linner}{(nC2)}{nthread32}
+   \threadBack{\linner}{(nD2)}{nthread33}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{XK8}{ }
+ \caption{
+        Three pipelines; 
+        six machines; 
+        six processors (one per machine);
+        six cores (one per processor);
+        {\bf twelve processes (two per core)};
+        twelve threads ({\bf one per process});
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   %
+   \machineBack{\lthistOuter}{(nA)(nB)}{nmachine01}
+   \machineBack{\lthistOuter}{(nC)(nD)}{nmachine02}
+   \machineBack{\lthistOuter}{(nA1)(nB1)}{nmachine11}
+   \machineBack{\lthistOuter}{(nC1)(nD1)}{nmachine12}
+   \machineBack{\lthistOuter}{(nA2)(nB2)}{nmachine20}
+   \machineBack{\lthistOuter}{(nC2)(nD2)}{nmachine21}
+   %
+   \chipBack{\lfarOuter}{(nA)(nB)}{ncore00}
+   \chipBack{\lfarOuter}{(nC)(nD)}{ncore00}
+   \chipBack{\lfarOuter}{(nA1)(nB1)}{ncore10}
+   \chipBack{\lfarOuter}{(nC1)(nD1)}{ncore11}
+   \chipBack{\lfarOuter}{(nA2)(nB2)}{ncore20}
+   \chipBack{\lfarOuter}{(nC2)(nD2)}{ncore21}
+   %
+   %
+   \coreBack{\louter}{(nA)}{ncore00}
+   \coreBack{\louter}{(nB)}{ncore01}
+   \coreBack{\louter}{(nC)}{ncore02}
+   \coreBack{\louter}{(nD)}{ncore03}
+   \coreBack{\louter}{(nA1)}{ncore10}
+   \coreBack{\louter}{(nB1)}{ncore11}
+   \coreBack{\louter}{(nC1)}{ncore12}
+   \coreBack{\louter}{(nD1)}{ncore13}
+   \coreBack{\louter}{(nA2)}{ncore20}
+   \coreBack{\louter}{(nB2)}{ncore21}
+   \coreBack{\louter}{(nC2)}{ncore22}
+   \coreBack{\louter}{(nD2)}{ncore23}
+   %
+   \processBack{\lmiddle}{(nA)}{nprocess10}
+   \processBack{\lmiddle}{(nB)}{nprocess11}
+   \processBack{\lmiddle}{(nC)}{nprocess12}
+   \processBack{\lmiddle}{(nD)}{nprocess13}
+   \processBack{\lmiddle}{(nA1)}{nprocess20}
+   \processBack{\lmiddle}{(nB1)}{nprocess21}
+   \processBack{\lmiddle}{(nC1)}{nprocess22}
+   \processBack{\lmiddle}{(nD1)}{nprocess23}
+   \processBack{\lmiddle}{(nA2)}{nprocess30}
+   \processBack{\lmiddle}{(nB2)}{nprocess31}
+   \processBack{\lmiddle}{(nC2)}{nprocess32}
+   \processBack{\lmiddle}{(nD2)}{nprocess33}
+   %%
+   \threadBack{\linner}{(nA)}{nthread10}
+   \threadBack{\linner}{(nB)}{nthread11}
+   \threadBack{\linner}{(nC)}{nthread12}
+   \threadBack{\linner}{(nD)}{nthread13}%
+   \threadBack{\linner}{(nA1)}{nthread20}
+   \threadBack{\linner}{(nB1)}{nthread21}
+   \threadBack{\linner}{(nC1)}{nthread22}
+   \threadBack{\linner}{(nD1)}{nthread23}%
+   \threadBack{\linner}{(nA2)}{nthread30}
+   \threadBack{\linner}{(nB2)}{nthread31}
+   \threadBack{\linner}{(nC2)}{nthread32}
+   \threadBack{\linner}{(nD2)}{nthread33}
+%
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+  \hypertarget{J05}{ }
+  \caption{
+        Three pipelines; 
+        six machines; 
+        six processors (one per machine);
+        {\bf twelve cores (two per processor)};
+        twelve processes ({\bf one per core});
+        twelve threads (one per process);
+}
+ \ifbool{links}{                
+          \vspace*{1cm}
+          \hyperlink{AA}{Reduce Pipelines}\\
+          \hyperlink{JJ}{Add Cores}
+        }{}
+ \end{figure}
+
+
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   %
+   \machineBack{\lthistOuter}{(nA)(nB)}{nmachine01}
+   \machineBack{\lthistOuter}{(nC)(nD)}{nmachine02}
+   \machineBack{\lthistOuter}{(nA1)(nB1)}{nmachine11}
+   \machineBack{\lthistOuter}{(nC1)(nD1)}{nmachine12}
+   \machineBack{\lthistOuter}{(nA2)(nB2)}{nmachine20}
+   \machineBack{\lthistOuter}{(nC2)(nD2)}{nmachine21}
+   %
+   \chipBack{\lfarOuter}{(nA)}{nchip00}
+   \chipBack{\lfarOuter}{(nB)}{nchip01}
+   \chipBack{\lfarOuter}{(nC)}{nchip02}
+   \chipBack{\lfarOuter}{(nD)}{nchip03}
+   \chipBack{\lfarOuter}{(nA1)}{nchip10}
+   \chipBack{\lfarOuter}{(nB1)}{nchip11}
+   \chipBack{\lfarOuter}{(nC1)}{nchip12}
+   \chipBack{\lfarOuter}{(nD1)}{nchip13}
+   \chipBack{\lfarOuter}{(nA2)}{nchip20}
+   \chipBack{\lfarOuter}{(nB2)}{nchip21}
+   \chipBack{\lfarOuter}{(nC2)}{nchip22}
+   \chipBack{\lfarOuter}{(nD2)}{nchip23}
+   %
+   \coreBack{\louter}{(nA)}{ncore00}
+   \coreBack{\louter}{(nB)}{ncore01}
+   \coreBack{\louter}{(nC)}{ncore02}
+   \coreBack{\louter}{(nD)}{ncore03}
+   \coreBack{\louter}{(nA1)}{ncore10}
+   \coreBack{\louter}{(nB1)}{ncore11}
+   \coreBack{\louter}{(nC1)}{ncore12}
+   \coreBack{\louter}{(nD1)}{ncore13}
+   \coreBack{\louter}{(nA2)}{ncore20}
+   \coreBack{\louter}{(nB2)}{ncore21}
+   \coreBack{\louter}{(nC2)}{ncore22}
+   \coreBack{\louter}{(nD2)}{ncore23}
+   %
+   \processBack{\lmiddle}{(nA)}{nprocess10}
+   \processBack{\lmiddle}{(nB)}{nprocess11}
+   \processBack{\lmiddle}{(nC)}{nprocess12}
+   \processBack{\lmiddle}{(nD)}{nprocess13}
+   \processBack{\lmiddle}{(nA1)}{nprocess20}
+   \processBack{\lmiddle}{(nB1)}{nprocess21}
+   \processBack{\lmiddle}{(nC1)}{nprocess22}
+   \processBack{\lmiddle}{(nD1)}{nprocess23}
+   \processBack{\lmiddle}{(nA2)}{nprocess30}
+   \processBack{\lmiddle}{(nB2)}{nprocess31}
+   \processBack{\lmiddle}{(nC2)}{nprocess32}
+   \processBack{\lmiddle}{(nD2)}{nprocess33}
+   %%
+   \threadBack{\linner}{(nA)}{nthread10}
+   \threadBack{\linner}{(nB)}{nthread11}
+   \threadBack{\linner}{(nC)}{nthread12}
+   \threadBack{\linner}{(nD)}{nthread13}%
+   \threadBack{\linner}{(nA1)}{nthread20}
+   \threadBack{\linner}{(nB1)}{nthread21}
+   \threadBack{\linner}{(nC1)}{nthread22}
+   \threadBack{\linner}{(nD1)}{nthread23}%
+   \threadBack{\linner}{(nA2)}{nthread30}
+   \threadBack{\linner}{(nB2)}{nthread31}
+   \threadBack{\linner}{(nC2)}{nthread32}
+   \threadBack{\linner}{(nD2)}{nthread33}
+%
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+  \hypertarget{Q78}{ }
+  \caption{
+        Three pipelines; 
+        six machines; 
+        {\bf twelve processors (two per machine)};
+        twelve cores ({\bf one per processor});
+        twelve processes (one per core);
+        twelve threads (one per process);
+}
+ \ifbool{links}{                
+          \vspace*{1cm}
+          \hyperlink{AA}{Reduce Pipelines}\\
+          \hyperlink{JJ}{Add Cores}
+        }{}
+ \end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+   \machineBack{\lthistOuter}{(nA)}{nmachine01}
+   \machineBack{\lStretchedFarOuter}{(nB)}{nmachine02}
+   \machineBack{\lStretchedFarOuter}{(nC)}{nmachine03}
+   \machineBack{\lthistOuter}{(nD)}{nmachine04}
+   \machineBack{\lthistOuter}{(nA1)}{nmachine10}
+   \machineBack{\lStretchedFarOuter}{(nB1)}{nmachine11}
+   \machineBack{\lStretchedFarOuter}{(nC1)}{nmachine13}
+   \machineBack{\lthistOuter}{(nD1)}{nmachine14}
+   \machineBack{\lthistOuter}{(nA2)}{nmachine20}
+   \machineBack{\lStretchedFarOuter}{(nB2)}{nmachine21}
+   \machineBack{\lStretchedFarOuter}{(nC2)}{nmachine22}
+   \machineBack{\lthistOuter}{(nD2)}{nmachine23}
+   %
+   \chipBack{\lfarOuter}{(nA)}{nchip00}
+   \chipBack{\lfarOuter}{(nB)}{nchip01}
+   \chipBack{\lfarOuter}{(nC)}{nchip02}
+   \chipBack{\lfarOuter}{(nD)}{nchip03}
+   \chipBack{\lfarOuter}{(nA1)}{nchip10}
+   \chipBack{\lfarOuter}{(nB1)}{nchip11}
+   \chipBack{\lfarOuter}{(nC1)}{nchip12}
+   \chipBack{\lfarOuter}{(nD1)}{nchip13}
+   \chipBack{\lfarOuter}{(nA2)}{nchip20}
+   \chipBack{\lfarOuter}{(nB2)}{nchip21}
+   \chipBack{\lfarOuter}{(nC2)}{nchip22}
+   \chipBack{\lfarOuter}{(nD2)}{nchip23}
+   %
+   \coreBack{\louter}{(nA)}{ncore00}
+   \coreBack{\louter}{(nB)}{ncore01}
+   \coreBack{\louter}{(nC)}{ncore02}
+   \coreBack{\louter}{(nD)}{ncore03}
+   \coreBack{\louter}{(nA1)}{ncore10}
+   \coreBack{\louter}{(nB1)}{ncore11}
+   \coreBack{\louter}{(nC1)}{ncore12}
+   \coreBack{\louter}{(nD1)}{ncore13}
+   \coreBack{\louter}{(nA2)}{ncore20}
+   \coreBack{\louter}{(nB2)}{ncore21}
+   \coreBack{\louter}{(nC2)}{ncore22}
+   \coreBack{\louter}{(nD2)}{ncore23}
+   %
+   \processBack{\lmiddle}{(nA)}{nprocess10}
+   \processBack{\lmiddle}{(nB)}{nprocess11}
+   \processBack{\lmiddle}{(nC)}{nprocess12}
+   \processBack{\lmiddle}{(nD)}{nprocess13}
+   \processBack{\lmiddle}{(nA1)}{nprocess20}
+   \processBack{\lmiddle}{(nB1)}{nprocess21}
+   \processBack{\lmiddle}{(nC1)}{nprocess22}
+   \processBack{\lmiddle}{(nD1)}{nprocess23}
+   \processBack{\lmiddle}{(nA2)}{nprocess30}
+   \processBack{\lmiddle}{(nB2)}{nprocess31}
+   \processBack{\lmiddle}{(nC2)}{nprocess32}
+   \processBack{\lmiddle}{(nD2)}{nprocess33}
+   %%
+   \threadBack{\linner}{(nA)}{nthread10}
+   \threadBack{\linner}{(nB)}{nthread11}
+   \threadBack{\linner}{(nC)}{nthread12}
+   \threadBack{\linner}{(nD)}{nthread13}%
+   \threadBack{\linner}{(nA1)}{nthread20}
+   \threadBack{\linner}{(nB1)}{nthread21}
+   \threadBack{\linner}{(nC1)}{nthread22}
+   \threadBack{\linner}{(nD1)}{nthread23}%
+   \threadBack{\linner}{(nA2)}{nthread30}
+   \threadBack{\linner}{(nB2)}{nthread31}
+   \threadBack{\linner}{(nC2)}{nthread32}
+   \threadBack{\linner}{(nD2)}{nthread33}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{P97}{ }
+ \caption{
+        Three pipelines; 
+        {\bf twelve machines}; 
+        twelve processors ({\bf one per machine});
+        twelve cores (one per processor);
+        twelve processes (one per core);
+        twelve threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htbp]
+\centering
+ \begin{tikzpicture}[>=latex,text height=1.5ex,text depth=0.25ex]
+   \drawM{\pipeSep}
+   \pgfsetarrowsend{\processArrow}
+   \edx{nA}{nB}{nC}{nD}
+   \edx{nA1}{nB1}{nC1}{nD1}
+   \edx{nA2}{nB2}{nC2}{nD2}
+
+
+   \machineBack{\lfarOuter}{(nA) (nA1) (nA2)}{nmachine01}
+   \machineBack{\lfarOuter}{(nB) (nB1) (nB2)}{nmachine02}
+   \machineBack{\lfarOuter}{(nC) (nC1) (nC2)}{nmachine03}
+
+   %
+   \chipBack{\lfarOuter}{(nA)}{nchip00}
+   \chipBack{\lfarOuter}{(nB)}{nchip01}
+   \chipBack{\lfarOuter}{(nC)}{nchip02}
+   \chipBack{\lfarOuter}{(nD)}{nchip03}
+   \chipBack{\lfarOuter}{(nA1)}{nchip10}
+   \chipBack{\lfarOuter}{(nB1)}{nchip11}
+   \chipBack{\lfarOuter}{(nC1)}{nchip12}
+   \chipBack{\lfarOuter}{(nD1)}{nchip13}
+   \chipBack{\lfarOuter}{(nA2)}{nchip20}
+   \chipBack{\lfarOuter}{(nB2)}{nchip21}
+   \chipBack{\lfarOuter}{(nC2)}{nchip22}
+   \chipBack{\lfarOuter}{(nD2)}{nchip23}
+   %
+   \coreBack{\louter}{(nA)}{ncore00}
+   \coreBack{\louter}{(nB)}{ncore01}
+   \coreBack{\louter}{(nC)}{ncore02}
+   \coreBack{\louter}{(nD)}{ncore03}
+   \coreBack{\louter}{(nA1)}{ncore10}
+   \coreBack{\louter}{(nB1)}{ncore11}
+   \coreBack{\louter}{(nC1)}{ncore12}
+   \coreBack{\louter}{(nD1)}{ncore13}
+   \coreBack{\louter}{(nA2)}{ncore20}
+   \coreBack{\louter}{(nB2)}{ncore21}
+   \coreBack{\louter}{(nC2)}{ncore22}
+   \coreBack{\louter}{(nD2)}{ncore23}
+   %
+   \processBack{\lmiddle}{(nA)}{nprocess10}
+   \processBack{\lmiddle}{(nB)}{nprocess11}
+   \processBack{\lmiddle}{(nC)}{nprocess12}
+   \processBack{\lmiddle}{(nD)}{nprocess13}
+   \processBack{\lmiddle}{(nA1)}{nprocess20}
+   \processBack{\lmiddle}{(nB1)}{nprocess21}
+   \processBack{\lmiddle}{(nC1)}{nprocess22}
+   \processBack{\lmiddle}{(nD1)}{nprocess23}
+   \processBack{\lmiddle}{(nA2)}{nprocess30}
+   \processBack{\lmiddle}{(nB2)}{nprocess31}
+   \processBack{\lmiddle}{(nC2)}{nprocess32}
+   \processBack{\lmiddle}{(nD2)}{nprocess33}
+   %%
+   \threadBack{\linner}{(nA)}{nthread10}
+   \threadBack{\linner}{(nB)}{nthread11}
+   \threadBack{\linner}{(nC)}{nthread12}
+   \threadBack{\linner}{(nD)}{nthread13}%
+   \threadBack{\linner}{(nA1)}{nthread20}
+   \threadBack{\linner}{(nB1)}{nthread21}
+   \threadBack{\linner}{(nC1)}{nthread22}
+   \threadBack{\linner}{(nD1)}{nthread23}%
+   \threadBack{\linner}{(nA2)}{nthread30}
+   \threadBack{\linner}{(nB2)}{nthread31}
+   \threadBack{\linner}{(nC2)}{nthread32}
+   \threadBack{\linner}{(nD2)}{nthread33}
+
+
+   % LEGEND
+   \legend{nmachine}
+ \end{tikzpicture}
+ \hypertarget{P97}{ }
+ \caption{
+        Three pipelines; 
+        {\bf twelve machines}; 
+        twelve processors ({\bf one per machine});
+        twelve cores (one per processor);
+        twelve processes (one per core);
+        twelve threads (one per process);
+}
+ \ifbool{links}{                
+         \vspace*{1cm}
+         \hyperlink{AA}{Reduce Pipelines}\\
+         \hyperlink{JJ}{Add Cores}
+        }{}
+\end{figure}
+
+\end{document}
